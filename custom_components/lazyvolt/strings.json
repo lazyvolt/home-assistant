@@ -1,0 +1,32 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to LazyVolt Cloud",
+        "description": "Enter your LazyVolt Cloud credentials. The edge name is how this Home Assistant instance will appear in the Cloud dashboard.",
+        "data": {
+          "cloud_url": "Cloud URL",
+          "edge_name": "Edge name",
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "peblar": {
+        "title": "Select Peblar charger",
+        "description": "Select which Peblar charger LazyVolt should control.",
+        "data": {
+          "peblar_entry_id": "Peblar device"
+        }
+      }
+    },
+    "abort": {
+      "no_peblar": "No Peblar integration found. Please set up the Peblar integration first.",
+      "already_configured": "LazyVolt is already configured."
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to LazyVolt Cloud. Check the URL and try again.",
+      "invalid_auth": "Invalid email or password.",
+      "unknown": "Unexpected error. Check the logs for details."
+    }
+  }
+}

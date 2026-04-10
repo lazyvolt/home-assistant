@@ -1,0 +1,12 @@
+# Home Assistant configuration for local LazyVolt development
+# Access at http://localhost:8123
+
+default_config:
+
+homeassistant:
+  name: LazyVolt Dev
+  latitude: 52.0  # set to your location
+  longitude: 5.0  # set to your location
+  elevation: 0
+  unit_system: metric
+  time_zone: Europe/Amsterdam

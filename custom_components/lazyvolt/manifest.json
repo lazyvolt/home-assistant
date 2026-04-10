@@ -1,0 +1,9 @@
+{
+  "domain": "lazyvolt",
+  "name": "LazyVolt",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://lazyvolt.com",
+  "iot_class": "cloud_polling",
+  "version": "1.0.0"
+}

@@ -1,0 +1,15 @@
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: lazyvolt-ha
+    volumes:
+      - ./ha-config:/config
+      - ./custom_components:/config/custom_components
+    ports:
+      - "8123:8123"
+    environment:
+      - TZ=Europe/Amsterdam
+    restart: unless-stopped
+    extra_hosts:
+      # Allows the integration to reach the Cloud at http://host.docker.internal:80
+      - "host.docker.internal:host-gateway"
