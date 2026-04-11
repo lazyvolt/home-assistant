@@ -10,3 +10,8 @@ homeassistant:
   elevation: 0
   unit_system: metric
   time_zone: Europe/Amsterdam
+
+logger:
+  default: warning
+  logs:
+    custom_components.lazyvolt: debug

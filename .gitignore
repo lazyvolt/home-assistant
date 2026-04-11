@@ -9,5 +9,13 @@ dist/
 .venv/
 venv/
 ha-config/.storage/
+ha-config/.cache/
+ha-config/.HA_VERSION
+ha-config/.ha_run.lock
 ha-config/home-assistant.log
+ha-config/home-assistant.log.*
 ha-config/home-assistant_v2.db
+ha-config/home-assistant_v2.db-shm
+ha-config/home-assistant_v2.db-wal
+ha-config/home-assistant_v2.db-journal
+ha-config/blueprints/

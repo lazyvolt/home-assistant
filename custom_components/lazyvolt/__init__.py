@@ -22,6 +22,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator.setup_entity_ids()
     await coordinator.async_config_entry_first_refresh()
 
+    # DataUpdateCoordinator only schedules recurring updates when listeners are
+    # registered. Since we expose no entity platforms, add a no-op listener so
+    # the coordinator keeps polling on its UPDATE_INTERVAL.
+    entry.async_on_unload(coordinator.async_add_listener(lambda: None))
+
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     return True
 

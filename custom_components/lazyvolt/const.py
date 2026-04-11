@@ -12,12 +12,15 @@ PEBLAR_DOMAIN = "peblar"
 PEBLAR_SELECT_SMART_CHARGING = "smart_charging"
 PEBLAR_SENSOR_ENERGY_TOTAL = "energy_total"
 PEBLAR_SENSOR_ENERGY_SESSION = "energy_session"
-PEBLAR_SENSOR_POWER_PHASE1 = "power_phase_1"
+PEBLAR_SENSOR_POWER = "power"  # total watts — always available
+PEBLAR_SENSOR_POWER_PHASE1 = "power_phase_1"  # disabled by default in Peblar HA integration
 PEBLAR_SENSOR_POWER_PHASE2 = "power_phase_2"
 PEBLAR_SENSOR_POWER_PHASE3 = "power_phase_3"
 PEBLAR_SENSOR_CURRENT_PHASE1 = "current_phase_1"
 PEBLAR_SENSOR_CURRENT_PHASE2 = "current_phase_2"
 PEBLAR_SENSOR_CURRENT_PHASE3 = "current_phase_3"
+
+PEBLAR_VOLTAGE = 230  # V — used to derive amps from total power when phase sensors unavailable
 PEBLAR_SENSOR_CP_STATE = "cp_state"
 PEBLAR_SWITCH_CHARGE = "charge"
 PEBLAR_SWITCH_FORCE_SINGLE_PHASE = "force_single_phase"

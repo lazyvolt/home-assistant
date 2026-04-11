@@ -22,11 +22,13 @@ from .const import (
     PEBLAR_SENSOR_CURRENT_PHASE3,
     PEBLAR_SENSOR_ENERGY_TOTAL,
     PEBLAR_SENSOR_ENERGY_SESSION,
+    PEBLAR_SENSOR_POWER,
     PEBLAR_SENSOR_POWER_PHASE1,
     PEBLAR_SENSOR_POWER_PHASE2,
     PEBLAR_SENSOR_POWER_PHASE3,
     PEBLAR_SWITCH_CHARGE,
     PEBLAR_SWITCH_FORCE_SINGLE_PHASE,
+    PEBLAR_VOLTAGE,
     UPDATE_INTERVAL,
 )
 
@@ -43,6 +45,23 @@ def _find_entity_id(
             and entry.platform == PEBLAR_DOMAIN
             and entry.domain == domain
             and entry.translation_key == translation_key
+            and not entry.disabled_by
+        ):
+            return entry.entity_id
+    return None
+
+
+def _find_entity_by_device_class(
+    registry: er.EntityRegistry, peblar_entry_id: str, domain: str, device_class: str
+) -> str | None:
+    """Return entity_id for a Peblar entity by platform domain and device class."""
+    for entry in registry.entities.values():
+        if (
+            entry.config_entry_id == peblar_entry_id
+            and entry.platform == PEBLAR_DOMAIN
+            and entry.domain == domain
+            and entry.original_device_class == device_class
+            and not entry.disabled_by
         ):
             return entry.entity_id
     return None
@@ -98,6 +117,8 @@ class LazyVoltCoordinator(DataUpdateCoordinator):
             "cp_state": _find_entity_id(registry, self._peblar_entry_id, "sensor", PEBLAR_SENSOR_CP_STATE),
             "energy_total": _find_entity_id(registry, self._peblar_entry_id, "sensor", PEBLAR_SENSOR_ENERGY_TOTAL),
             "energy_session": _find_entity_id(registry, self._peblar_entry_id, "sensor", PEBLAR_SENSOR_ENERGY_SESSION),
+            # Power sensor has no translation_key — look up by device class
+            "power": _find_entity_by_device_class(registry, self._peblar_entry_id, "sensor", "power"),
             "power_phase_1": _find_entity_id(registry, self._peblar_entry_id, "sensor", PEBLAR_SENSOR_POWER_PHASE1),
             "power_phase_2": _find_entity_id(registry, self._peblar_entry_id, "sensor", PEBLAR_SENSOR_POWER_PHASE2),
             "power_phase_3": _find_entity_id(registry, self._peblar_entry_id, "sensor", PEBLAR_SENSOR_POWER_PHASE3),
@@ -124,7 +145,7 @@ class LazyVoltCoordinator(DataUpdateCoordinator):
         try:
             await self._api.post_telemetry({
                 "charger_watts": peblar.get("power_total"),
-                "charger_amps": peblar.get("current_phase_1"),
+                "charger_amps": peblar.get("charger_amps"),
                 "charger_phases": peblar.get("phases"),
                 "charger_on": peblar.get("charge_on"),
                 "kwh_session": peblar.get("energy_session"),
@@ -183,15 +204,26 @@ class LazyVoltCoordinator(DataUpdateCoordinator):
         cp_state_raw = _str_state(hass, self._entity_ids.get("cp_state"))
         cloud_status = PEBLAR_CP_STATE_TO_CLOUD_STATUS.get(cp_state_raw or "", "unreachable")
 
-        # Power: sum available phase sensors (disabled by default in Peblar, may be None)
-        p1 = _float_state(hass, self._entity_ids.get("power_phase_1"))
-        p2 = _float_state(hass, self._entity_ids.get("power_phase_2"))
-        p3 = _float_state(hass, self._entity_ids.get("power_phase_3"))
-        power_total = int(sum(v for v in (p1, p2, p3) if v is not None)) if any(v is not None for v in (p1, p2, p3)) else None
+        # Power: prefer total sensor (always available); fall back to summing phase sensors
+        # (phase sensors are disabled by default in the Peblar HA integration)
+        power_total = _float_state(hass, self._entity_ids.get("power"))
+        if power_total is None:
+            p1 = _float_state(hass, self._entity_ids.get("power_phase_1"))
+            p2 = _float_state(hass, self._entity_ids.get("power_phase_2"))
+            p3 = _float_state(hass, self._entity_ids.get("power_phase_3"))
+            if any(v is not None for v in (p1, p2, p3)):
+                power_total = sum(v for v in (p1, p2, p3) if v is not None)
+        power_total_int = int(power_total) if power_total is not None else None
 
         # Phases: force_single_phase on → 1, off → 3
         force_single = _str_state(hass, self._entity_ids.get("force_single_phase"))
         phases = 1 if force_single == "on" else 3
+
+        # Amps: prefer phase sensors (disabled by default); derive from total power as integer fallback
+        current_phase_1 = _float_state(hass, self._entity_ids.get("current_phase_1"))
+        charger_amps: int | None = int(round(current_phase_1)) if current_phase_1 is not None else None
+        if charger_amps is None and power_total is not None and phases > 0:
+            charger_amps = int(round(power_total / (PEBLAR_VOLTAGE * phases)))
 
         # charger_on: True when cp_state is "charging"
         charge_on = cp_state_raw == "charging"
@@ -199,8 +231,9 @@ class LazyVoltCoordinator(DataUpdateCoordinator):
         return {
             "cp_state": cp_state_raw,
             "cloud_status": cloud_status,
-            "power_total": power_total,
-            "current_phase_1": _float_state(hass, self._entity_ids.get("current_phase_1")),
+            "power_total": power_total_int,
+            "charger_amps": charger_amps,
+            "current_phase_1": current_phase_1,
             "current_phase_2": _float_state(hass, self._entity_ids.get("current_phase_2")),
             "current_phase_3": _float_state(hass, self._entity_ids.get("current_phase_3")),
             "phases": phases,

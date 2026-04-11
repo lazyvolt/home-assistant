@@ -11,5 +11,6 @@ services:
       - TZ=Europe/Amsterdam
     restart: unless-stopped
     extra_hosts:
-      # Allows the integration to reach the Cloud at http://host.docker.internal:80
+      # Reach the Cloud at http://host.docker.internal:80
+      # Also enables reaching local network devices (Peblar, P1 meter) via host routing
       - "host.docker.internal:host-gateway"
