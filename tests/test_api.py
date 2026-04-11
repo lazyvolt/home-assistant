@@ -1,8 +1,8 @@
 """Tests for LazyVoltApiClient."""
 from __future__ import annotations
 
-import pytest
 import aiohttp
+import pytest
 from aioresponses import aioresponses
 
 from custom_components.lazyvolt.api import (
@@ -16,14 +16,14 @@ CLOUD_URL = "http://localhost:80"
 
 
 @pytest.fixture
-def client(hass):
+async def client(hass):
     from homeassistant.helpers.aiohttp_client import async_get_clientsession
     session = async_get_clientsession(hass)
     return LazyVoltApiClient(CLOUD_URL, session)
 
 
 @pytest.fixture
-def authed_client(hass):
+async def authed_client(hass):
     from homeassistant.helpers.aiohttp_client import async_get_clientsession
     session = async_get_clientsession(hass)
     return LazyVoltApiClient(CLOUD_URL, session, token="1|abc")
@@ -71,13 +71,11 @@ async def test_post_telemetry_sends_payload(authed_client):
     with aioresponses() as m:
         m.post(f"{CLOUD_URL}/api/v1/edge/telemetry", status=204)
         await authed_client.post_telemetry({"mode": "SOLAR", "charger_status": "charging"})
-    # No exception = success
 
 
 async def test_post_progress_ignores_404_no_active_goal(authed_client):
     with aioresponses() as m:
         m.post(f"{CLOUD_URL}/api/v1/edge/progress", status=404)
-        # Should not raise
         await authed_client.post_progress(1_000_000)
 
 
@@ -85,4 +83,3 @@ async def test_post_progress_sends_wh(authed_client):
     with aioresponses() as m:
         m.post(f"{CLOUD_URL}/api/v1/edge/progress", status=200, payload={"kwh_charged": 5.0})
         await authed_client.post_progress(5_000_000)
-    # No exception = success

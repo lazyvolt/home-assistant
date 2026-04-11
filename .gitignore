@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+*.egg-info/
+.venv/
+venv/
+ha-config/.storage/
+ha-config/home-assistant.log
+ha-config/home-assistant_v2.db
