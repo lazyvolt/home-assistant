@@ -1,10 +1,28 @@
 """Shared fixtures for LazyVolt integration tests."""
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import aiohttp
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+# Prime the pycares DNS resolver background thread at import time (module level),
+# before pytest-homeassistant-custom-component's verify_cleanup fixture captures
+# threads_before for any test. pycares._ChannelShutdownManager starts a
+# _run_safe_shutdown_loop daemon thread on the first aiohttp session creation;
+# if that happens during a test, verify_cleanup flags it as a lingering thread.
+_prime_loop = asyncio.new_event_loop()
+
+
+async def _prime_pycares() -> None:
+    async with aiohttp.ClientSession():
+        pass
+
+
+_prime_loop.run_until_complete(_prime_pycares())
+_prime_loop.close()
 
 from custom_components.lazyvolt.const import (
     CONF_CLOUD_TOKEN,
