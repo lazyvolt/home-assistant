@@ -1,6 +1,7 @@
 """Constants for the LazyVolt integration."""
 
 DOMAIN = "lazyvolt"
+PRODUCTION_CLOUD_URL = "https://lazyvolt.com"
 DEFAULT_CLOUD_URL = "http://host.docker.internal:80"
 DEFAULT_EDGE_NAME = "Home Assistant"
 UPDATE_INTERVAL = 30  # seconds

@@ -9,6 +9,7 @@ services:
       - "8123:8123"
     environment:
       - TZ=Europe/Amsterdam
+      - LAZYVOLT_DEV=true
     restart: unless-stopped
     extra_hosts:
       # Reach the Cloud at http://host.docker.internal:80
