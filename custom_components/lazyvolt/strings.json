@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Connect to LazyVolt Cloud",
-        "description": "Enter the email and password you use to log in to [lazyvolt.com](https://lazyvolt.com). The edge name is how this Home Assistant instance will appear in your LazyVolt dashboard.",
+        "description": "Enter the email and password you use to log in to {lazyvolt_url}. The edge name is how this Home Assistant instance will appear in your LazyVolt dashboard.",
         "data": {
           "cloud_url": "Cloud URL",
           "edge_name": "Edge name",

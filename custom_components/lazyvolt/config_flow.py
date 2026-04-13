@@ -85,6 +85,7 @@ class LazyVoltConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(fields),
+            description_placeholders={"lazyvolt_url": "lazyvolt.com"},
             errors=errors,
         )
 
